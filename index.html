@@ -7,10 +7,20 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <h1>Welcome to Our Website</h1>
-    <input type="text" id="userName" placeholder="Enter your name">
-    <button onclick="displayGreeting()">Submit</button>
-    <h2 id="greeting"></h2>
+    <h1>Lets Play Undercover Agent</h1>
+    <p> <input type="int" id="numPlayers" placeholder="Enter # players"> </p>
+    <p> 
+        <input type="int" id="numUndercover" placeholder="Enter # undercover agents"> 
+        <input type="int" id="numWhite" placeholder="Enter # mr whites"> 
+    </p>
+    <p> <button onclick="renderNameBoxes()">Submit</button> </p>
+    <!-- <p>
+        <input type="text" id="userName" placeholder="Enter your name">
+    </p>
+    <button onclick="displayGreeting()">Submit</button> -->
+    <!-- <h2 id="greeting"></h2> -->
+    <h2 id="inputNames"></h2>
+    <h2 id="ready"></h2>
     <script src="script.js"></script>
 </body>
 </html>
