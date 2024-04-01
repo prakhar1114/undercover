@@ -7,7 +7,8 @@ function getURLParams() {
     decodeURIComponent(params.get("playerNames") || "[]")
   );
   scores = JSON.parse(decodeURIComponent(params.get("scores") || "{}"));
-  round = Number(params.get("round"));
+  game = Number(params.get("game"));
+  round = 1
   //   return { mrWhites, undercoverAgents, playerNames };
 }
 
@@ -24,7 +25,7 @@ function displayScoreboard() {
 
 function populateRoundNumber() {
   const roundNumberDiv = document.getElementById("gameInfo");
-  roundNumberDiv.innerText = `Round Number ${round}`;
+  roundNumberDiv.innerText = `Game Number ${game} round ${round}`;
 }
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -235,7 +236,7 @@ function check_game_over_and_who_won() {
   } else {
     game_over = false;
   }
-  return game_over, who_won, victory_msg;
+  return {game_over, who_won, victory_msg};
 }
 
 function remove_element_from_list(list, element) {
@@ -255,8 +256,8 @@ const PlayerType = {
 };
 
 const VictoryMsg = {
-  UNDERCOVERWIN: "Game over. Civilians win",
-  CIVILIANWIN: "Game over. Undercover Agent and Mr White wins",
+  CIVILIANWIN: "Game over. Civilians win",
+  UNDERCOVERWIN: "Game over. Undercover Agent and Mr White wins",
 };
 
 function start_next_round_of_voting() {
@@ -303,8 +304,7 @@ function check_guess(name) {
 
 function continue_game_or_not() {
 
-  var game_over, who_won, victory_msg;
-  game_over, who_won, victory_msg = check_game_over_and_who_won();
+  const { game_over, who_won, victory_msg } = check_game_over_and_who_won();
 
   if (game_over) {
     if (who_won == PlayerType.CIVILIAN) {
@@ -325,7 +325,7 @@ function continue_game_or_not() {
 
     var winning_players
     // winner player names
-    if (player_type == PlayerType.CIVILIAN) {
+    if (who_won == PlayerType.CIVILIAN) {
       winning_players = civilianList
     } else {
       winning_players = undercoverAgentlist.concat(mrWhitelist)
@@ -361,8 +361,26 @@ function continue_game_or_not() {
     para.id = "info";
     playzone.appendChild(para);
 
+    displayScoreboard()
+
+    var button = document.createElement("button");
+    button.innerText = `Play Again`;
+    button.onclick = function() {
+      play_new_game()
+    };
+    playzone.appendChild(button)
+    
     } else {
       start_next_round_of_voting();
     }
+}
 
+function play_new_game() {
+    game += 1
+    const scoresParam = encodeURIComponent(JSON.stringify(scores));
+    const playerNamesParam = encodeURIComponent(JSON.stringify(playerNames));
+
+    // Pass mrWhites, undercoverAgents, playerNames, and scores as URL parameters
+    const url = `game.html?game=${game}&mrWhites=${mrWhites}&undercoverAgents=${undercoverAgents}&playerNames=${playerNamesParam}&scores=${scoresParam}`;
+    window.location.href = url;
 }

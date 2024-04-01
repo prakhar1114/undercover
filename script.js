@@ -78,11 +78,11 @@ function verify() {
         scores[name] = 0;
     });
 
-    let round = 1;
+    let game = 1;
     const scoresParam = encodeURIComponent(JSON.stringify(scores));
     const playerNamesParam = encodeURIComponent(JSON.stringify(playerNames));
 
     // Pass mrWhites, undercoverAgents, playerNames, and scores as URL parameters
-    const url = `game.html?round=${round}&mrWhites=${mrWhites}&undercoverAgents=${undercoverAgents}&playerNames=${playerNamesParam}&scores=${scoresParam}`;
+    const url = `game.html?game=${game}&mrWhites=${mrWhites}&undercoverAgents=${undercoverAgents}&playerNames=${playerNamesParam}&scores=${scoresParam}`;
     window.location.href = url;
   }
