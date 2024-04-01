@@ -7,7 +7,7 @@ function getURLParams() {
     decodeURIComponent(params.get("playerNames") || "[]")
   );
   scores = JSON.parse(decodeURIComponent(params.get("scores") || "{}"));
-  round = params.get("round");
+  round = Number(params.get("round"));
   //   return { mrWhites, undercoverAgents, playerNames };
 }
 
@@ -34,13 +34,17 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 function beginRound() {
-  let shuffledPlayerNames = shuffleArray([...playerNames]); // Use spread operator to avoid modifying the original array
+  shuffledPlayerNames = shuffleArray([...playerNames]); // Use spread operator to avoid modifying the original array
   let selected = select_agents(shuffledPlayerNames, mrWhites, undercoverAgents);
   mrWhitelist = selected.mrWhites;
   undercoverAgentlist = selected.undercoverAgents;
-  civilianList = array.filter(
+  civilianList = playerNames.filter(
     (item) => !mrWhitelist.includes(item) && !undercoverAgentlist.includes(item)
   );
+
+  initial_civilans = [...civilianList]
+  initial_undercover_agents = [...undercoverAgentlist]
+  initial_mrwhites = [...mrWhitelist]
 
   // // Print player names in a single line separated by commas
   // var para = document.createElement("P");
@@ -171,6 +175,15 @@ function reveal_word(secret_word, idx) {
 function begin_voting() {
   playzone.innerHTML = "";
 
+  if (shuffledPlayerNames.length != current_players.length) {
+    shuffledPlayerNames = shuffleArray([...current_players]);
+  }
+
+  // instruction
+  var para = document.createElement("P");
+  para.innerText = `Order of voting ${shuffledPlayerNames}`;
+  playzone.appendChild(para);
+
   // instruction
   var para = document.createElement("P");
   para.innerText = `Discuss and select who to eliminate`;
@@ -179,11 +192,6 @@ function begin_voting() {
   // Create a new div element
   let button_container = document.createElement("div");
 
-  //   // Optionally set some attributes
-  //   button_container.id = "buttonsContainer"; // Setting an ID for easy access later
-  //   button_container.style.padding = "20px"; // Adding some padding for visual spacing
-  //   button_container.style.border = "1px solid #000"; // Adding a border to visualize the container
-
   // Append the container to the document body or another specific element
   playzone.appendChild(button_container); // Appending to the body
 
@@ -191,8 +199,6 @@ function begin_voting() {
     let button = document.createElement("button"); // Create a new button element
     button.innerHTML = name; // Set the button's text to the current string
     button.addEventListener("click", function () {
-      alert("Clicked " + name); // Example action: Alert button name when clicked
-
       remove_element_from_list(current_players, name);
 
       var player_type = "";
@@ -201,42 +207,14 @@ function begin_voting() {
       } else if (remove_element_from_list(undercoverAgentlist, name)) {
         player_type = PlayerType.UNDERCOVER;
       } else {
+        remove_element_from_list(civilianList, name);
         player_type = PlayerType.CIVILIAN;
       }
 
-      var game_over, who_won, victory_msg;
-      game_over, who_won, (victory_msg = check_game_over_and_who_won());
-
-      if (game_over) {
-        if (who_won == PlayerType.CIVILIAN) {
-          civilianList.forEach((key) => {
-            scores[key] += 2;
-          });
-        } else {
-          undercoverAgentlist.forEach((key) => {
-            scores[key] += 10;
-          });
-
-          mrWhitelist.forEach((key) => {
-            scores[key] += 6;
-          });
-        }
-
-        // MR White should try to guess the word: update the scores if he guesses it write
-        // End the game is Mr white guesses the word right
-        // pass game_over to the function so that if the word is not correct and game not over, new round should begin
-        if (player_type == PlayerType.MRWHITE) {
-          mr_white_guess(game_over);
-        }
+      if (player_type == PlayerType.MRWHITE) {
+        mr_white_guess(name);
       } else {
-        if (player_type == PlayerType.MRWHITE) {
-          // MR White should try to guess the word: update the scores if he guesses it write
-          // End the game is Mr white guesses the word right
-          // pass game_over to the function so that if the word is not correct and game not over, new round should begin
-          mr_white_guess(game_over);
-        } else {
-          start_next_round_of_voting();
-        }
+        continue_game_or_not()
       }
     });
     button.style.margin = "10px";
@@ -246,11 +224,11 @@ function begin_voting() {
 
 function check_game_over_and_who_won() {
   var game_over, who_won, victory_msg;
-  if (mrWhitelist.length() == 0 && undercoverAgentlist.length() == 0) {
+  if (mrWhitelist.length == 0 && undercoverAgentlist.length == 0) {
     game_over = true;
     who_won = PlayerType.CIVILIAN;
     victory_msg = VictoryMsg.CIVILIANWIN;
-  } else if (civilianList.length() == 0) {
+  } else if (civilianList.length == 1) {
     who_won = PlayerType.UNDERCOVER;
     victory_msg = VictoryMsg.UNDERCOVERWIN;
     game_over = true;
@@ -287,4 +265,104 @@ function start_next_round_of_voting() {
   populateRoundNumber();
   displayScoreboard(); // Ensure this is called to display the scores
   begin_voting();
+}
+
+function mr_white_guess(name) {
+
+  // instruction
+  var para = document.createElement("P");
+  para.innerText = `Oooof, seems like ${name} was Mr White. He was the one mumbling random shit and trying to blend in`;
+  para.id = "info";
+  playzone.appendChild(para);
+
+  var input = document.createElement("input");
+  input.type = "text";
+  input.placeholder = "";
+  input.id = "mrwhites_guess";
+  input.style.margin = "3px"
+  playzone.appendChild(input);
+
+  // submit guess
+  var goButton = document.createElement("button");
+  goButton.innerHTML = "Is this my word?";
+  goButton.onclick = function() {
+    check_guess(name);
+  };
+  playzone.appendChild(goButton);
+}
+``
+function check_guess(name) {
+
+  var guess = document.getElementById("mrwhites_guess").value;
+  if (guess == civilian_word) {
+    scores[name] += 6
+  }
+
+  continue_game_or_not()
+}
+
+function continue_game_or_not() {
+
+  var game_over, who_won, victory_msg;
+  game_over, who_won, victory_msg = check_game_over_and_who_won();
+
+  if (game_over) {
+    if (who_won == PlayerType.CIVILIAN) {
+      civilianList.forEach((key) => {
+        scores[key] += 2;
+      });
+    } else {
+      undercoverAgentlist.forEach((key) => {
+        scores[key] += 10;
+      });
+
+      mrWhitelist.forEach((key) => {
+        scores[key] += 6;
+      });
+    }
+    // empty the playzone
+    playzone.innerHTML = ''
+
+    var winning_players
+    // winner player names
+    if (player_type == PlayerType.CIVILIAN) {
+      winning_players = civilianList
+    } else {
+      winning_players = undercoverAgentlist.concat(mrWhitelist)
+    }
+
+    var para = document.createElement("P");
+    para.innerText = `Winners ${who_won} ${winning_players}`;
+    para.id = "info";
+    playzone.appendChild(para);
+
+    var para = document.createElement("P");
+    para.innerText = victory_msg;
+    para.id = "info";
+    playzone.appendChild(para);
+
+    var para = document.createElement("P");
+    para.innerText = `Civilian word was ${civilian_word}, undercover word was ${undercover_word} `;
+    para.id = "info";
+    playzone.appendChild(para);
+
+    var para = document.createElement("P");
+    para.innerText = `Initial Civilians ${initial_civilans} `;
+    para.id = "info";
+    playzone.appendChild(para);
+
+    var para = document.createElement("P");
+    para.innerText = `Initial Undercover Agents  ${initial_undercover_agents}`;
+    para.id = "info";
+    playzone.appendChild(para);
+
+    var para = document.createElement("P");
+    para.innerText = `Initial Mr Whites ${initial_mrwhites} `;
+    para.id = "info";
+    playzone.appendChild(para);
+
+    } else {
+      start_next_round_of_voting();
+    }
+
 }
