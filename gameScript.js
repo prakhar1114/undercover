@@ -52,8 +52,13 @@ function beginRound() {
   // para.innerText = `Ready to play? shuffled order ${shuffledPlayerNames.join(', ')} mrwhites ${selected.mrWhites.join(', ')} undercover ${selected.undercoverAgents.join(', ')}`;
   // playzone.appendChild(para);
 
-  civilian_word = "chair";
-  undercover_word = "sit";
+  // civilian_word = "chair";
+  // undercover_word = "sit";
+
+  const words = getRandomWordPairAndShuffle();
+
+  civilian_word = words[0];
+  undercover_word = words[1];
 
   current_players = [...playerNames];
   var idx = 0;
@@ -383,4 +388,9 @@ function play_new_game() {
     // Pass mrWhites, undercoverAgents, playerNames, and scores as URL parameters
     const url = `game.html?game=${game}&mrWhites=${mrWhites}&undercoverAgents=${undercoverAgents}&playerNames=${playerNamesParam}&scores=${scoresParam}`;
     window.location.href = url;
+}
+
+function getRandomWordPairAndShuffle() {
+  const selectedPair = wordPairs[Math.floor(Math.random() * wordPairs.length)];
+  return Math.random() > 0.5 ? [selectedPair[1], selectedPair[0]] : selectedPair;
 }
