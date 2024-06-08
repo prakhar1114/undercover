@@ -12,15 +12,28 @@ function getURLParams() {
   //   return { mrWhites, undercoverAgents, playerNames };
 }
 
+// function displayScoreboard() {
+//   const scoresDiv = document.getElementById("scores");
+//   scoresDiv.innerHTML = ""; // Clear previous scoreboard content
+
+//   Object.keys(scores).forEach((playerName) => {
+//     let playerScore = document.createElement("p");
+//     playerScore.innerText = `${playerName}: ${scores[playerName]}`; // Display score from scores object
+//     scoresDiv.appendChild(playerScore);
+//   });
+// }
+
 function displayScoreboard() {
   const scoresDiv = document.getElementById("scores");
-  scoresDiv.innerHTML = ""; // Clear previous scoreboard content
+  let scoreEntries = []; // Initialize an array to hold score strings
 
   Object.keys(scores).forEach((playerName) => {
-    let playerScore = document.createElement("p");
-    playerScore.innerText = `${playerName}: ${scores[playerName]}`; // Display score from scores object
-    scoresDiv.appendChild(playerScore);
+    // Create a string for each player's score and add it to the array
+    scoreEntries.push(`${playerName}: ${scores[playerName]}`);
   });
+
+  // Join all entries with a comma and a space, and set it as innerHTML of the scoresDiv
+  scoresDiv.innerHTML = scoreEntries.join(" | ");
 }
 
 function clearScoreboard() {
