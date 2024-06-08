@@ -23,6 +23,11 @@ function displayScoreboard() {
   });
 }
 
+function clearScoreboard() {
+  const scoresDiv = document.getElementById("scores");
+  scoresDiv.innerHTML = ""; // Clear previous scoreboard content
+}
+
 function populateRoundNumber() {
   const roundNumberDiv = document.getElementById("gameInfo");
   roundNumberDiv.innerText = `Game Number ${game} round ${round}`;
@@ -31,7 +36,7 @@ function populateRoundNumber() {
 document.addEventListener("DOMContentLoaded", function () {
   getURLParams();
   populateRoundNumber();
-  displayScoreboard(); // Ensure this is called to display the scores
+  // displayScoreboard(); // Ensure this is called to display the scores
 });
 
 function beginRound() {
@@ -269,7 +274,8 @@ function start_next_round_of_voting() {
   // Pass mrWhites, undercoverAgents, playerNames, and scores as URL parameters
   round += 1;
   populateRoundNumber();
-  displayScoreboard(); // Ensure this is called to display the scores
+  // displayScoreboard(); // Ensure this is called to display the scores
+  clearScoreboard();
   begin_voting();
 }
 
